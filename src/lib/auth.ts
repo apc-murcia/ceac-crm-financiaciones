@@ -22,9 +22,27 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
 
+        const email = credentials.email.toLowerCase().trim()
+
+        // Superadmin via env vars — no requiere entrada en BD
+        if (
+          process.env.BASIC_AUTH_USER &&
+          process.env.BASIC_AUTH_PASSWORD &&
+          email === process.env.BASIC_AUTH_USER.toLowerCase() &&
+          credentials.password === process.env.BASIC_AUTH_PASSWORD
+        ) {
+          return {
+            id: '0',
+            name: 'Admin',
+            email: process.env.BASIC_AUTH_USER,
+            rol: 'admin',
+            sede: null,
+          }
+        }
+
         const result = await pool.query<Usuario>(
           'SELECT * FROM usuarios WHERE email = $1 AND activo = true',
-          [credentials.email.toLowerCase().trim()]
+          [email]
         )
 
         const user = result.rows[0]
