@@ -15,25 +15,26 @@ export default function DashboardNav() {
 
   return (
     <nav style={{
-      background: '#005eb8',
+      background: '#0017EC',
       color: '#fff',
       display: 'flex',
       alignItems: 'center',
       padding: '0 1.5rem',
-      height: '56px',
+      height: '58px',
       gap: '2rem',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+      boxShadow: '0 2px 12px rgba(0,23,236,0.25)',
     }}>
       {/* Logo */}
       <Link href="/dashboard" style={{
         fontWeight: 800,
-        fontSize: '1.1rem',
-        letterSpacing: '1px',
-        color: '#fff',
+        fontSize: '1rem',
+        letterSpacing: '0.08em',
+        color: '#CDFF4F',
         textDecoration: 'none',
         whiteSpace: 'nowrap',
+        textTransform: 'uppercase',
       }}>
-        CEAC CRM
+        CEAC · Financiaciones
       </Link>
 
       {/* Nav links */}
@@ -45,13 +46,14 @@ export default function DashboardNav() {
               key={href}
               href={href}
               style={{
-                color: '#fff',
+                color: active ? '#CDFF4F' : 'rgba(255,255,255,0.8)',
                 textDecoration: 'none',
                 padding: '0.4rem 0.875rem',
                 borderRadius: '6px',
-                fontSize: '0.9rem',
+                fontSize: '0.875rem',
                 fontWeight: active ? 600 : 400,
-                background: active ? 'rgba(255,255,255,0.15)' : 'transparent',
+                background: active ? 'rgba(205,255,79,0.12)' : 'transparent',
+                borderBottom: active ? '2px solid #CDFF4F' : '2px solid transparent',
               }}
             >
               {label}
@@ -60,24 +62,27 @@ export default function DashboardNav() {
         })}
       </div>
 
-      {/* User info + logout */}
+      {/* User + logout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', whiteSpace: 'nowrap' }}>
         {session?.user && (
-          <span style={{ fontSize: '0.8125rem', opacity: 0.85 }}>
-            {session.user.name} — {(session.user as any).rol}
+          <span style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.75)' }}>
+            {session.user.name}
+            <span style={{ marginLeft: '0.4rem', background: 'rgba(205,255,79,0.2)', color: '#CDFF4F', borderRadius: '999px', padding: '0.1rem 0.5rem', fontSize: '0.7rem', fontWeight: 600 }}>
+              {(session.user as any).rol}
+            </span>
           </span>
         )}
         <button
           onClick={() => signOut({ callbackUrl: '/login' })}
           style={{
-            background: 'rgba(255,255,255,0.15)',
-            color: '#fff',
-            border: '1px solid rgba(255,255,255,0.3)',
+            background: '#CDFF4F',
+            color: '#0017EC',
+            border: 'none',
             borderRadius: '6px',
-            padding: '0.35rem 0.875rem',
+            padding: '0.375rem 0.875rem',
             fontSize: '0.8125rem',
             cursor: 'pointer',
-            fontWeight: 500,
+            fontWeight: 700,
           }}
         >
           Salir
