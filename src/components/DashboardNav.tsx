@@ -27,16 +27,11 @@ export default function DashboardNav() {
       boxShadow: '0 2px 12px rgba(0,23,236,0.25)',
     }}>
       {/* Logo */}
-      <Link href="/dashboard" style={{
-        fontWeight: 800,
-        fontSize: '1rem',
-        letterSpacing: '0.08em',
-        color: '#CDFF4F',
-        textDecoration: 'none',
-        whiteSpace: 'nowrap',
-        textTransform: 'uppercase',
-      }}>
-        CEAC · Financiaciones
+      <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+        <img src="/logo-ceac.png" alt="CEAC" style={{ height: '28px', filter: 'brightness(0) invert(1)' }} />
+        <span style={{ color: '#CDFF4F', fontWeight: 700, fontSize: '0.875rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+          Financiaciones
+        </span>
       </Link>
 
       {/* Nav links */}

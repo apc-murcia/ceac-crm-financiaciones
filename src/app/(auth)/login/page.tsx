@@ -34,16 +34,11 @@ export default function LoginPage() {
     }}>
 
       {/* Logo */}
-      <div style={{
-        color: '#fff',
-        fontWeight: 900,
-        fontSize: '3.5rem',
-        letterSpacing: '-0.02em',
-        marginBottom: '0.5rem',
-        lineHeight: 1,
-      }}>
-        CEAC
-      </div>
+      <img
+        src="/logo-ceac.png"
+        alt="CEAC"
+        style={{ height: '64px', marginBottom: '0.5rem', filter: 'brightness(0) invert(1)' }}
+      />
 
       {/* Título */}
       <div style={{
