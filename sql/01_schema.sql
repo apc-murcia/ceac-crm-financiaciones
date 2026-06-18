@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
   rol VARCHAR(20) NOT NULL DEFAULT 'agente', -- agente, supervisor, admin
   sede VARCHAR(50), -- Madrid, Barcelona, Valencia
   activo BOOLEAN DEFAULT true,
+  force_change BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

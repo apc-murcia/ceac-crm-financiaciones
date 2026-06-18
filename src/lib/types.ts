@@ -30,6 +30,7 @@ export interface Usuario {
   rol: Rol
   sede: Sede | null
   activo: boolean
+  force_change: boolean
   created_at: string
 }
 

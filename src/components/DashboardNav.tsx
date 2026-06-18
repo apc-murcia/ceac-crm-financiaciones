@@ -8,9 +8,11 @@ export default function DashboardNav() {
   const { data: session } = useSession()
   const pathname = usePathname()
 
+  const rol = (session?.user as any)?.rol
   const navLinks = [
     { href: '/dashboard', label: 'Resumen' },
     { href: '/dashboard/alumnos', label: 'Alumnos' },
+    ...((['admin', 'supervisor'].includes(rol)) ? [{ href: '/dashboard/admin', label: 'Admin' }] : []),
   ]
 
   return (
