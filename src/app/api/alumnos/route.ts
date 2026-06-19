@@ -21,9 +21,28 @@ export async function GET(request: NextRequest) {
     limit: Math.min(Number(searchParams.get('limit') || 50), 200),
   }
 
+  const user = session.user as any
+  const rol = user?.rol
+  const acceso = user?.acceso_modalidad || 'all'
+  const userSede = user?.sede
+
   const conditions: string[] = []
   const params: any[] = []
   let paramIdx = 1
+
+  // Filtro de acceso automático según perfil del usuario
+  if (rol === 'agente' || rol === 'supervisor') {
+    if (acceso === 'presencial_blearning') {
+      conditions.push(`a.tipo_producto IN ('Presencial', 'B-Learning')`)
+      if (userSede) {
+        conditions.push(`a.sede = $${paramIdx++}`)
+        params.push(userSede)
+      }
+    } else if (acceso === 'distancia') {
+      conditions.push(`a.tipo_producto = 'Distancia'`)
+    }
+    // acceso === 'all' → sin restricción adicional
+  }
 
   if (filters.estado) {
     conditions.push(`a.estado = $${paramIdx++}`)

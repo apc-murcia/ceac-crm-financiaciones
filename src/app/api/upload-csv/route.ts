@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
         row[col('Opportunity.OrderInProgress__r.DocMgrStatus__c')]?.trim() || null,
         row[col('Opportunity.OrderInProgress__r.InternalComments__c')]?.trim() || null,
         row[col('CreatedDate')]?.trim() || null,
+        row[col('Tipo producto')]?.trim() || null,
       ]
 
       const updateSet = `
@@ -125,6 +126,7 @@ export async function POST(req: NextRequest) {
           importe_financiado = EXCLUDED.importe_financiado,
           doc_mgr_status = EXCLUDED.doc_mgr_status,
           ultimo_comentario = EXCLUDED.ultimo_comentario,
+          tipo_producto = EXCLUDED.tipo_producto,
           updated_at = NOW()
       `
 
@@ -137,8 +139,8 @@ export async function POST(req: NextRequest) {
           sf_opportunity_id, sf_order_id, nombre, apellidos, email, telefono,
           sede, curso, modalidad, estado,
           importe_total_recibos, importe_reserva, importe_financiado,
-          doc_mgr_status, ultimo_comentario, fecha_conversion
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+          doc_mgr_status, ultimo_comentario, fecha_conversion, tipo_producto
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
         ON CONFLICT (${conflictCol}) DO UPDATE SET ${updateSet}
         RETURNING (xmax = 0) AS was_inserted
       `, values)

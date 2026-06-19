@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   }
 
   const { rows } = await pool.query(`
-    SELECT id, nombre, email, rol, sede, activo, force_change, created_at
+    SELECT id, nombre, email, rol, sede, acceso_modalidad, activo, force_change, created_at
     FROM usuarios
     ORDER BY nombre ASC
   `)
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const { nombre, email, password, rol, sede } = body
+  const { nombre, email, password, rol, sede, acceso_modalidad } = body
 
   if (!nombre || !email || !password || !rol) {
     return NextResponse.json({ error: 'Faltan campos obligatorios' }, { status: 400 })
@@ -47,10 +47,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const { rows } = await pool.query(`
-      INSERT INTO usuarios (nombre, email, password_hash, rol, sede, force_change)
-      VALUES ($1, $2, $3, $4, $5, true)
-      RETURNING id, nombre, email, rol, sede, activo, force_change, created_at
-    `, [nombre, email.toLowerCase().trim(), hash, rol, sede || null])
+      INSERT INTO usuarios (nombre, email, password_hash, rol, sede, acceso_modalidad, force_change)
+      VALUES ($1, $2, $3, $4, $5, $6, true)
+      RETURNING id, nombre, email, rol, sede, acceso_modalidad, activo, force_change, created_at
+    `, [nombre, email.toLowerCase().trim(), hash, rol, sede || null, acceso_modalidad || 'all'])
 
     return NextResponse.json(rows[0], { status: 201 })
   } catch (err: any) {

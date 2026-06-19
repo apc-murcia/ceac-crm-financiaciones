@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react'
 
 const ROLES = ['admin', 'supervisor', 'agente']
 const SEDES = ['Madrid', 'Barcelona', 'Valencia']
+const ACCESOS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'presencial_blearning', label: 'Presencial + B-Learning (su sede)' },
+  { value: 'distancia', label: 'Distancia (global)' },
+]
 
 interface User {
   id: number
@@ -13,6 +18,7 @@ interface User {
   sede: string | null
   activo: boolean
   force_change: boolean
+  acceso_modalidad: string
 }
 
 interface AdminPanelProps {
@@ -26,12 +32,12 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
   const [success, setSuccess] = useState('')
 
   // Formulario nuevo usuario
-  const [form, setForm] = useState({ nombre: '', email: '', password: '', rol: 'agente', sede: '' })
+  const [form, setForm] = useState({ nombre: '', email: '', password: '', rol: 'agente', sede: '', acceso_modalidad: 'all' })
   const [creating, setCreating] = useState(false)
 
   // Modal edición
   const [editing, setEditing] = useState<User | null>(null)
-  const [editForm, setEditForm] = useState({ nombre: '', rol: '', sede: '', activo: true, password: '' })
+  const [editForm, setEditForm] = useState({ nombre: '', rol: '', sede: '', activo: true, password: '', acceso_modalidad: 'all' })
   const [saving, setSaving] = useState(false)
 
   const isAdmin = currentUserRol === 'admin'
@@ -71,7 +77,7 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
 
   function openEdit(u: User) {
     setEditing(u)
-    setEditForm({ nombre: u.nombre, rol: u.rol, sede: u.sede || '', activo: u.activo, password: '' })
+    setEditForm({ nombre: u.nombre, rol: u.rol, sede: u.sede || '', activo: u.activo, password: '', acceso_modalidad: u.acceso_modalidad || 'all' })
   }
 
   async function saveEdit(e: React.FormEvent) {
@@ -141,6 +147,9 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
               <option value="">— Sede (opcional) —</option>
               {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
+            <select className="input" value={form.acceso_modalidad} onChange={e => setForm(f => ({ ...f, acceso_modalidad: e.target.value }))}>
+              {ACCESOS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+            </select>
             <button type="submit" className="btn btn-primary" disabled={creating} style={{ alignSelf: 'end' }}>
               {creating ? 'Creando…' : 'Crear usuario'}
             </button>
@@ -167,6 +176,7 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
                   <th>Email</th>
                   <th>Rol</th>
                   <th>Sede</th>
+                  <th>Acceso</th>
                   <th>Estado</th>
                   {isAdmin && <th>Acciones</th>}
                 </tr>
@@ -182,6 +192,11 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
                       </span>
                     </td>
                     <td style={{ color: '#5a5a8a' }}>{u.sede || '—'}</td>
+                    <td>
+                      <span className="badge" style={{ background: '#E5E5FA', color: '#0017EC', fontSize: '0.7rem' }}>
+                        {ACCESOS.find(a => a.value === (u.acceso_modalidad || 'all'))?.label || 'Todos'}
+                      </span>
+                    </td>
                     <td>
                       <span className="badge" style={{
                         background: u.activo ? '#bbf7d0' : '#fee2e2',
@@ -240,6 +255,9 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
               <select className="input" value={editForm.sede} onChange={e => setEditForm(f => ({ ...f, sede: e.target.value }))}>
                 <option value="">— Sin sede —</option>
                 {SEDES.map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              <select className="input" value={editForm.acceso_modalidad} onChange={e => setEditForm(f => ({ ...f, acceso_modalidad: e.target.value }))}>
+                {ACCESOS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
               </select>
               <input className="input" type="password" placeholder="Nueva contraseña (dejar vacío para no cambiar)" value={editForm.password} onChange={e => setEditForm(f => ({ ...f, password: e.target.value }))} />
               <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>

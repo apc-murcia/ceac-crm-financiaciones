@@ -16,18 +16,19 @@ export async function PUT(req: NextRequest, { params }: { params: { email: strin
 
   const email = decodeURIComponent(params.email)
   const body = await req.json()
-  const { nombre, rol, sede, activo, force_change, password } = body
+  const { nombre, rol, sede, activo, force_change, password, acceso_modalidad } = body
 
   const sets: string[] = []
   const values: any[] = []
   let idx = 1
 
-  if (nombre !== undefined)       { sets.push(`nombre = $${idx++}`);       values.push(nombre) }
-  if (rol !== undefined)          { sets.push(`rol = $${idx++}`);          values.push(rol) }
-  if (sede !== undefined)         { sets.push(`sede = $${idx++}`);         values.push(sede || null) }
-  if (activo !== undefined)       { sets.push(`activo = $${idx++}`);       values.push(activo) }
-  if (force_change !== undefined) { sets.push(`force_change = $${idx++}`); values.push(force_change) }
-  if (password)                   { sets.push(`password_hash = $${idx++}`); values.push(await bcrypt.hash(password, 10)) }
+  if (nombre !== undefined)          { sets.push(`nombre = $${idx++}`);          values.push(nombre) }
+  if (rol !== undefined)             { sets.push(`rol = $${idx++}`);             values.push(rol) }
+  if (sede !== undefined)            { sets.push(`sede = $${idx++}`);            values.push(sede || null) }
+  if (activo !== undefined)          { sets.push(`activo = $${idx++}`);          values.push(activo) }
+  if (force_change !== undefined)    { sets.push(`force_change = $${idx++}`);    values.push(force_change) }
+  if (acceso_modalidad !== undefined){ sets.push(`acceso_modalidad = $${idx++}`); values.push(acceso_modalidad) }
+  if (password)                      { sets.push(`password_hash = $${idx++}`);   values.push(await bcrypt.hash(password, 10)) }
 
   if (sets.length === 0) {
     return NextResponse.json({ error: 'Nada que actualizar' }, { status: 400 })
