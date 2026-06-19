@@ -139,7 +139,7 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
           <form onSubmit={createUser} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem' }}>
             <input className="input" placeholder="Nombre completo" value={form.nombre} onChange={e => setForm(f => ({ ...f, nombre: e.target.value }))} required />
             <input className="input" type="email" placeholder="Email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required />
-            <input className="input" type="password" placeholder="Contraseña (mín. 8 chars)" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required />
+            <input className="input" type="password" placeholder="Contraseña (mín. 8 chars)" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required autoComplete="new-password" />
             <select className="input" value={form.rol} onChange={e => setForm(f => ({ ...f, rol: e.target.value }))}>
               {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
@@ -259,7 +259,7 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
               <select className="input" value={editForm.acceso_modalidad} onChange={e => setEditForm(f => ({ ...f, acceso_modalidad: e.target.value }))}>
                 {ACCESOS.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
               </select>
-              <input className="input" type="password" placeholder="Nueva contraseña (dejar vacío para no cambiar)" value={editForm.password} onChange={e => setEditForm(f => ({ ...f, password: e.target.value }))} />
+              <input className="input" type="password" placeholder="Nueva contraseña (dejar vacío para no cambiar)" value={editForm.password} onChange={e => setEditForm(f => ({ ...f, password: e.target.value }))} autoComplete="new-password" />
               <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                 <button type="button" className="btn btn-outline" onClick={() => setEditing(null)}>Cancelar</button>
                 <button type="submit" className="btn btn-secondary" disabled={saving}>{saving ? 'Guardando…' : 'Guardar'}</button>
