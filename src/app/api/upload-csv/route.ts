@@ -47,6 +47,14 @@ function parseCSV(text: string): { headers: string[]; rows: string[][] } {
   return { headers, rows }
 }
 
+function parseFecha(val: string): string | null {
+  if (!val?.trim()) return null
+  // Convierte DD/MM/YYYY → YYYY-MM-DD
+  const parts = val.trim().split('/')
+  if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`
+  return null
+}
+
 function parseImporte(val: string): number | null {
   if (!val?.trim()) return null
   const cleaned = val.trim().replace(',', '.')
@@ -107,7 +115,7 @@ export async function POST(req: NextRequest) {
         parseImporte(row[col('Opportunity.OrderInProgress__r.FinancedAmount__c')]),
         row[col('Opportunity.OrderInProgress__r.DocMgrStatus__c')]?.trim() || null,
         row[col('Opportunity.OrderInProgress__r.InternalComments__c')]?.trim() || null,
-        row[col('CreatedDate')]?.trim() || null,
+        parseFecha(row[col('CreatedDate')]),
         row[col('Tipo producto')]?.trim() || null,
       ]
 
