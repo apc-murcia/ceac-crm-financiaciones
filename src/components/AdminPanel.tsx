@@ -67,7 +67,7 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
     setCreating(false)
     if (r.ok) {
       notify(`Usuario ${form.nombre} creado`)
-      setForm({ nombre: '', email: '', password: '', rol: 'agente', sede: '' })
+      setForm({ nombre: '', email: '', password: '', rol: 'agente', sede: '', acceso_modalidad: 'all' })
       loadUsers()
     } else {
       const d = await r.json()
