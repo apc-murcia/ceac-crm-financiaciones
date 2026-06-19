@@ -132,8 +132,17 @@ export async function POST(req: NextRequest) {
       `
 
       // Upsert por sf_order_id si existe (matrícula SF), si no por sf_opportunity_id
-      const conflictCol = sfOrderId ? 'sf_order_id' : 'sf_opportunity_id'
-      if (!['sf_order_id', 'sf_opportunity_id'].includes(conflictCol)) continue
+      let conflictClause: string
+      let updateSetFinal: string
+      if (sfOrderId) {
+        // Índice parcial — hay que incluir la cláusula WHERE
+        conflictClause = '(sf_order_id) WHERE sf_order_id IS NOT NULL'
+        // No actualizar sf_opportunity_id para no violar su unique constraint
+        updateSetFinal = updateSet.replace('sf_opportunity_id = EXCLUDED.sf_opportunity_id,\n          ', '')
+      } else {
+        conflictClause = '(sf_opportunity_id)'
+        updateSetFinal = updateSet
+      }
 
       const result = await pool.query(`
         INSERT INTO alumnos (
@@ -142,7 +151,7 @@ export async function POST(req: NextRequest) {
           importe_total_recibos, importe_reserva, importe_financiado,
           doc_mgr_status, ultimo_comentario, fecha_conversion, tipo_producto
         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
-        ON CONFLICT (${conflictCol}) DO UPDATE SET ${updateSet}
+        ON CONFLICT ${conflictClause} DO UPDATE SET ${updateSetFinal}
         RETURNING (xmax = 0) AS was_inserted
       `, values)
 
