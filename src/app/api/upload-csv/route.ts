@@ -111,37 +111,35 @@ export async function POST(req: NextRequest) {
         row[col('Tipo producto')]?.trim() || null,
       ]
 
-      const updateSet = `
-          sf_opportunity_id = EXCLUDED.sf_opportunity_id,
-          sf_order_id = EXCLUDED.sf_order_id,
-          nombre = EXCLUDED.nombre,
-          apellidos = EXCLUDED.apellidos,
-          email = EXCLUDED.email,
-          telefono = EXCLUDED.telefono,
-          sede = EXCLUDED.sede,
-          curso = EXCLUDED.curso,
-          modalidad = EXCLUDED.modalidad,
-          estado = EXCLUDED.estado,
-          importe_total_recibos = EXCLUDED.importe_total_recibos,
-          importe_reserva = EXCLUDED.importe_reserva,
-          importe_financiado = EXCLUDED.importe_financiado,
-          doc_mgr_status = EXCLUDED.doc_mgr_status,
-          ultimo_comentario = EXCLUDED.ultimo_comentario,
-          tipo_producto = EXCLUDED.tipo_producto,
-          updated_at = NOW()
-      `
-
       // Upsert por sf_order_id si existe (matrícula SF), si no por sf_opportunity_id
+      // El índice de sf_order_id es parcial (WHERE sf_order_id IS NOT NULL)
+      // El índice de sf_opportunity_id es parcial (WHERE sf_order_id IS NULL)
+      const commonSet = [
+        'nombre = EXCLUDED.nombre',
+        'apellidos = EXCLUDED.apellidos',
+        'email = EXCLUDED.email',
+        'telefono = EXCLUDED.telefono',
+        'sede = EXCLUDED.sede',
+        'curso = EXCLUDED.curso',
+        'modalidad = EXCLUDED.modalidad',
+        'estado = EXCLUDED.estado',
+        'importe_total_recibos = EXCLUDED.importe_total_recibos',
+        'importe_reserva = EXCLUDED.importe_reserva',
+        'importe_financiado = EXCLUDED.importe_financiado',
+        'doc_mgr_status = EXCLUDED.doc_mgr_status',
+        'ultimo_comentario = EXCLUDED.ultimo_comentario',
+        'tipo_producto = EXCLUDED.tipo_producto',
+        'updated_at = NOW()',
+      ].join(', ')
+
       let conflictClause: string
       let updateSetFinal: string
       if (sfOrderId) {
-        // Índice parcial — hay que incluir la cláusula WHERE
         conflictClause = '(sf_order_id) WHERE sf_order_id IS NOT NULL'
-        // No actualizar sf_opportunity_id para no violar su unique constraint
-        updateSetFinal = updateSet.replace('sf_opportunity_id = EXCLUDED.sf_opportunity_id,\n          ', '')
+        updateSetFinal = commonSet
       } else {
-        conflictClause = '(sf_opportunity_id)'
-        updateSetFinal = updateSet
+        conflictClause = '(sf_opportunity_id) WHERE sf_order_id IS NULL'
+        updateSetFinal = 'sf_order_id = EXCLUDED.sf_order_id, ' + commonSet
       }
 
       const result = await pool.query(`
