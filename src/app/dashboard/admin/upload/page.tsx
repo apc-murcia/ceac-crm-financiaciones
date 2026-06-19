@@ -7,7 +7,7 @@ export default function UploadCSVPage() {
   const [file, setFile] = useState<File | null>(null)
   const [dragging, setDragging] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{ inserted: number; updated: number; errors: number; total: number } | null>(null)
+  const [result, setResult] = useState<{ inserted: number; updated: number; errors: number; total: number; errorSamples?: string[] } | null>(null)
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -93,10 +93,15 @@ export default function UploadCSVPage() {
 
         {result && (
           <div style={{ background: '#f0fdf4', border: '1px solid #86efac', color: '#166534', padding: '0.75rem 1rem', borderRadius: '8px', fontSize: '0.875rem', marginBottom: '1rem' }}>
-            ✓ <strong>{file === null ? result.total : result.total} registros procesados</strong>
+            ✓ <strong>{result.total} registros procesados</strong>
             <div style={{ marginTop: '0.25rem', fontSize: '0.8rem' }}>
               {result.inserted} nuevos · {result.updated} actualizados{result.errors > 0 ? ` · ${result.errors} errores` : ''}
             </div>
+            {result.errorSamples && result.errorSamples.length > 0 && (
+              <div style={{ marginTop: '0.5rem', background: '#fef2f2', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '6px', padding: '0.5rem 0.75rem', fontSize: '0.75rem' }}>
+                <strong>Error:</strong> {result.errorSamples[0]}
+              </div>
+            )}
           </div>
         )}
 
