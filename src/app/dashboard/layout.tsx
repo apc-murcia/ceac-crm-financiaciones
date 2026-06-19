@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 import { authOptions } from '@/lib/auth'
 import SessionProviderWrapper from '@/components/SessionProviderWrapper'
+import InactivityGuard from '@/components/InactivityGuard'
 
 export default async function DashboardLayout({
   children,
@@ -13,6 +14,7 @@ export default async function DashboardLayout({
 
   return (
     <SessionProviderWrapper session={session}>
+      <InactivityGuard />
       {children}
     </SessionProviderWrapper>
   )
