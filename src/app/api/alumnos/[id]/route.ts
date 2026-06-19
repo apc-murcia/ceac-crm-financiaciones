@@ -85,6 +85,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
       setClauses.push(`fecha_conversion = $${idx++}`)
       values.push(body.fecha_conversion)
     }
+    if (body.observaciones !== undefined) {
+      setClauses.push(`observaciones = $${idx++}`)
+      values.push(body.observaciones)
+    }
     // Si el estado nuevo es 'convertido', auto-registrar fecha
     if (body.estado === 'convertido' && body.fecha_conversion === undefined) {
       setClauses.push(`fecha_conversion = NOW()`)

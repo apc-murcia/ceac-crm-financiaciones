@@ -90,12 +90,13 @@ export async function POST(req: NextRequest) {
 
       const result = await pool.query(`
         INSERT INTO alumnos (
-          sf_opportunity_id, nombre, apellidos, email, telefono,
+          sf_opportunity_id, sf_order_id, nombre, apellidos, email, telefono,
           sede, curso, modalidad, estado,
           importe_total_recibos, importe_reserva, importe_financiado,
           doc_mgr_status, ultimo_comentario, fecha_conversion
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
         ON CONFLICT (sf_opportunity_id) DO UPDATE SET
+          sf_order_id = EXCLUDED.sf_order_id,
           nombre = EXCLUDED.nombre,
           apellidos = EXCLUDED.apellidos,
           email = EXCLUDED.email,
@@ -113,6 +114,7 @@ export async function POST(req: NextRequest) {
         RETURNING (xmax = 0) AS was_inserted
       `, [
         sfId,
+        row[col('Opportunity.OrderInProgress__r.Id')]?.trim() || null,
         nombre,
         apellidos,
         row[col('Opportunity.Account.PersonEmail')]?.trim() || null,

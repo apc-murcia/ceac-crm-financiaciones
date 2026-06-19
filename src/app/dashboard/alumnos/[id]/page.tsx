@@ -70,6 +70,9 @@ export default function AlumnoDetailPage() {
   const [estadoNuevo, setEstadoNuevo] = useState<EstadoAlumno | ''>('')
   const [submitting, setSubmitting] = useState(false)
   const [submitMsg, setSubmitMsg] = useState('')
+  const [observaciones, setObservaciones] = useState('')
+  const [savingObs, setSavingObs] = useState(false)
+  const [obsMsg, setObsMsg] = useState('')
 
   async function fetchData() {
     try {
@@ -81,6 +84,7 @@ export default function AlumnoDetailPage() {
       const ad = await ar.json()
       setAlumno(ad.alumno)
       setEstadoNuevo(ad.alumno.estado)
+      setObservaciones(ad.alumno.observaciones || '')
       setLlamadas(await lr.json())
     } catch (e: any) {
       setError(e.message)
@@ -90,6 +94,26 @@ export default function AlumnoDetailPage() {
   }
 
   useEffect(() => { fetchData() }, [id])
+
+  async function handleObservaciones() {
+    setSavingObs(true)
+    setObsMsg('')
+    try {
+      const res = await fetch(`/api/alumnos/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ observaciones }),
+      })
+      if (!res.ok) throw new Error('Error al guardar')
+      setObsMsg('Guardado')
+      await fetchData()
+    } catch {
+      setObsMsg('Error al guardar')
+    } finally {
+      setSavingObs(false)
+      setTimeout(() => setObsMsg(''), 3000)
+    }
+  }
 
   async function handleLlamada(e: FormEvent) {
     e.preventDefault()
@@ -250,6 +274,37 @@ export default function AlumnoDetailPage() {
               <span className="badge" style={{ background: ec.bg, color: ec.text, fontSize: '0.875rem', padding: '0.4rem 1rem' }}>
                 {ESTADO_LABELS[alumno.estado]}
               </span>
+            </div>
+
+            {/* Observaciones */}
+            <div style={card}>
+              <h2 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0017EC', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.75rem' }}>
+                Observaciones
+              </h2>
+              <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.75rem' }}>
+                Notas internas — no se pierden al reimportar el CSV
+              </p>
+              <textarea
+                className="input"
+                value={observaciones}
+                onChange={e => setObservaciones(e.target.value)}
+                rows={5}
+                placeholder="Escribe aquí las observaciones sobre este alumno…"
+                style={{ resize: 'vertical', width: '100%', boxSizing: 'border-box' }}
+              />
+              {obsMsg && (
+                <div style={{ fontSize: '0.8rem', color: obsMsg === 'Guardado' ? '#16a34a' : '#dc2626', marginTop: '0.4rem' }}>
+                  {obsMsg === 'Guardado' ? '✓ Guardado' : obsMsg}
+                </div>
+              )}
+              <button
+                onClick={handleObservaciones}
+                disabled={savingObs}
+                className="btn btn-primary"
+                style={{ width: '100%', justifyContent: 'center', padding: '0.65rem', marginTop: '0.75rem' }}
+              >
+                {savingObs ? 'Guardando…' : 'Guardar observaciones'}
+              </button>
             </div>
 
             {/* Nueva llamada */}

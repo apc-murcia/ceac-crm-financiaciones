@@ -53,6 +53,8 @@ export interface Alumno {
   doc_mgr_status: DocMgrStatus | null
   asignado_a: number | null
   ultimo_comentario: string | null
+  observaciones: string | null
+  sf_order_id: string | null
   fecha_ultimo_contacto: string | null
   fecha_conversion: string | null
   created_at: string
@@ -99,6 +101,7 @@ export interface AlumnoFilters {
 export interface AlumnoUpdatePayload {
   estado?: EstadoAlumno
   ultimo_comentario?: string
+  observaciones?: string
   asignado_a?: number | null
   fecha_ultimo_contacto?: string
   fecha_conversion?: string
