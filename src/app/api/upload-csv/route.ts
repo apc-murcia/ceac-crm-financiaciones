@@ -130,6 +130,7 @@ export async function POST(req: NextRequest) {
 
       // Upsert por sf_order_id si existe (matrícula SF), si no por sf_opportunity_id
       const conflictCol = sfOrderId ? 'sf_order_id' : 'sf_opportunity_id'
+      if (!['sf_order_id', 'sf_opportunity_id'].includes(conflictCol)) continue
 
       const result = await pool.query(`
         INSERT INTO alumnos (
