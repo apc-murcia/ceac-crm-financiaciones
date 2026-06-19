@@ -58,6 +58,7 @@ export const authOptions: NextAuthOptions = {
           rol: user.rol,
           sede: user.sede,
           acceso_modalidad: (user as any).acceso_modalidad || 'all',
+          force_change: user.force_change ?? false,
         }
       },
     }),
@@ -69,6 +70,7 @@ export const authOptions: NextAuthOptions = {
         token.sede = (user as any).sede
         token.userId = Number((user as any).id)
         token.acceso_modalidad = (user as any).acceso_modalidad || 'all'
+        token.force_change = (user as any).force_change ?? false
       }
       return token
     },
@@ -78,6 +80,7 @@ export const authOptions: NextAuthOptions = {
         ;(session.user as any).sede = token.sede
         ;(session.user as any).id = token.userId
         ;(session.user as any).acceso_modalidad = token.acceso_modalidad
+        ;(session.user as any).force_change = token.force_change
       }
       return session
     },
