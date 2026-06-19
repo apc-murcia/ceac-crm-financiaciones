@@ -25,6 +25,9 @@ export async function POST(req: NextRequest) {
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_alumnos_sf_order_id ON alumnos (sf_order_id) WHERE sf_order_id IS NOT NULL`,
   ]
 
+  const { rows: whoami } = await pool.query('SELECT current_user, session_user')
+  const dbUser = whoami[0]
+
   const results: { sql: string; ok: boolean; error?: string }[] = []
   for (const sql of migrations) {
     try {
@@ -35,5 +38,5 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ results })
+  return NextResponse.json({ dbUser, results })
 }
