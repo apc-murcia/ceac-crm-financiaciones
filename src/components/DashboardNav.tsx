@@ -70,7 +70,7 @@ export default function DashboardNav() {
           </span>
         )}
         <button
-          onClick={() => signOut({ callbackUrl: '/login' })}
+          onClick={() => signOut({ callbackUrl: `${window.location.origin}/login` })}
           style={{
             background: '#CDFF4F',
             color: '#0017EC',
