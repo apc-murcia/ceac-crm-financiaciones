@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
   const col = (name: string) => headers.indexOf(name)
 
   let inserted = 0, updated = 0, errors = 0
+  const errorSamples: string[] = []
 
   for (const row of rows) {
     if (row.length < 10) continue
@@ -147,10 +148,11 @@ export async function POST(req: NextRequest) {
 
       if (result.rows[0]?.was_inserted) inserted++
       else updated++
-    } catch {
+    } catch (err: any) {
       errors++
+      if (errorSamples.length < 3) errorSamples.push(String(err?.message || err))
     }
   }
 
-  return NextResponse.json({ inserted, updated, errors, total: inserted + updated })
+  return NextResponse.json({ inserted, updated, errors, total: inserted + updated, errorSamples })
 }
