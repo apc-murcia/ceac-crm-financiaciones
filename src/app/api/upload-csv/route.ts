@@ -88,14 +88,29 @@ export async function POST(req: NextRequest) {
       const nombre = parts.slice(0, 2).join(' ')
       const apellidos = parts.slice(2).join(' ') || null
 
-      const result = await pool.query(`
-        INSERT INTO alumnos (
-          sf_opportunity_id, sf_order_id, nombre, apellidos, email, telefono,
-          sede, curso, modalidad, estado,
-          importe_total_recibos, importe_reserva, importe_financiado,
-          doc_mgr_status, ultimo_comentario, fecha_conversion
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
-        ON CONFLICT (sf_opportunity_id) DO UPDATE SET
+      const sfOrderId = row[col('Opportunity.OrderInProgress__r.Id')]?.trim() || null
+
+      const values = [
+        sfId,
+        sfOrderId,
+        nombre,
+        apellidos,
+        row[col('Opportunity.Account.PersonEmail')]?.trim() || null,
+        row[col('Opportunity.Account.Phone')]?.trim() || null,
+        row[col('Opportunity.Center__r.Name')]?.trim() || null,
+        row[col('Opportunity.ActualProducts__c')]?.split(',')[0]?.trim() || null,
+        row[col('Opportunity.Modality__c')]?.trim() || null,
+        mapEstado(row[col('Opportunity.StageName')]?.trim()),
+        parseImporte(row[col('Opportunity.OrderInProgress__r.Importe_Total__c')]),
+        parseImporte(row[col('Opportunity.OrderInProgress__r.ReservaAmount__c')]),
+        parseImporte(row[col('Opportunity.OrderInProgress__r.FinancedAmount__c')]),
+        row[col('Opportunity.OrderInProgress__r.DocMgrStatus__c')]?.trim() || null,
+        row[col('Opportunity.OrderInProgress__r.InternalComments__c')]?.trim() || null,
+        row[col('CreatedDate')]?.trim() || null,
+      ]
+
+      const updateSet = `
+          sf_opportunity_id = EXCLUDED.sf_opportunity_id,
           sf_order_id = EXCLUDED.sf_order_id,
           nombre = EXCLUDED.nombre,
           apellidos = EXCLUDED.apellidos,
@@ -111,25 +126,21 @@ export async function POST(req: NextRequest) {
           doc_mgr_status = EXCLUDED.doc_mgr_status,
           ultimo_comentario = EXCLUDED.ultimo_comentario,
           updated_at = NOW()
+      `
+
+      // Upsert por sf_order_id si existe (matrícula SF), si no por sf_opportunity_id
+      const conflictCol = sfOrderId ? 'sf_order_id' : 'sf_opportunity_id'
+
+      const result = await pool.query(`
+        INSERT INTO alumnos (
+          sf_opportunity_id, sf_order_id, nombre, apellidos, email, telefono,
+          sede, curso, modalidad, estado,
+          importe_total_recibos, importe_reserva, importe_financiado,
+          doc_mgr_status, ultimo_comentario, fecha_conversion
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+        ON CONFLICT (${conflictCol}) DO UPDATE SET ${updateSet}
         RETURNING (xmax = 0) AS was_inserted
-      `, [
-        sfId,
-        row[col('Opportunity.OrderInProgress__r.Id')]?.trim() || null,
-        nombre,
-        apellidos,
-        row[col('Opportunity.Account.PersonEmail')]?.trim() || null,
-        row[col('Opportunity.Account.Phone')]?.trim() || null,
-        row[col('Opportunity.Center__r.Name')]?.trim() || null,
-        row[col('Opportunity.ActualProducts__c')]?.split(',')[0]?.trim() || null,
-        row[col('Opportunity.Modality__c')]?.trim() || null,
-        mapEstado(row[col('Opportunity.StageName')]?.trim()),
-        parseImporte(row[col('Opportunity.OrderInProgress__r.Importe_Total__c')]),
-        parseImporte(row[col('Opportunity.OrderInProgress__r.ReservaAmount__c')]),
-        parseImporte(row[col('Opportunity.OrderInProgress__r.FinancedAmount__c')]),
-        row[col('Opportunity.OrderInProgress__r.DocMgrStatus__c')]?.trim() || null,
-        row[col('Opportunity.OrderInProgress__r.InternalComments__c')]?.trim() || null,
-        row[col('CreatedDate')]?.trim() || null,
-      ])
+      `, values)
 
       if (result.rows[0]?.was_inserted) inserted++
       else updated++
