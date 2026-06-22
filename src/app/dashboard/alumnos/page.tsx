@@ -117,7 +117,7 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
     search: searchParams.search || '',
     page,
     pago_cambiado: pagoCambiado,
-    estado_sf: searchParams.estado_sf || '',
+    estado_sf: searchParams.estado_sf !== undefined ? searchParams.estado_sf : 'Cerrada ganada',
   })
   const pages = Math.ceil(total / PAGE_SIZE)
 
@@ -133,7 +133,7 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
     return `/dashboard/alumnos?${params.toString()}`
   }
 
-  const hayFiltros = searchParams.estado || searchParams.sede || searchParams.search || searchParams.pago_cambiado || searchParams.estado_sf
+  const hayFiltros = searchParams.estado || searchParams.sede || searchParams.search || searchParams.pago_cambiado || (searchParams.estado_sf && searchParams.estado_sf !== 'Cerrada ganada')
 
   return (
     <div style={{ minHeight: '100vh', background: '#f0f0fb' }}>
@@ -182,7 +182,7 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
             <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0017EC', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Estado matrícula SF</label>
-            <select name="estado_sf" defaultValue={searchParams.estado_sf || ''} className="input">
+            <select name="estado_sf" defaultValue={searchParams.estado_sf !== undefined ? searchParams.estado_sf : 'Cerrada ganada'} className="input">
               {ESTADO_SF_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
             </select>
           </div>
