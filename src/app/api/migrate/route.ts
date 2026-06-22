@@ -32,6 +32,18 @@ export async function POST(req: NextRequest) {
     `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS importe_reserva_actual NUMERIC(10,2)`,
     `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS importe_financiado_actual NUMERIC(10,2)`,
     `ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS acceso_modalidad VARCHAR(30) NOT NULL DEFAULT 'all'`,
+    `CREATE TABLE IF NOT EXISTS llamadas (
+      id SERIAL PRIMARY KEY,
+      alumno_id INTEGER NOT NULL REFERENCES alumnos(id) ON DELETE CASCADE,
+      usuario_id INTEGER REFERENCES usuarios(id) ON DELETE SET NULL,
+      fecha TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      duracion_segundos INTEGER,
+      resultado VARCHAR(50),
+      comentario TEXT,
+      estado_anterior VARCHAR(50),
+      estado_nuevo VARCHAR(50),
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
     `ALTER TABLE alumnos DROP CONSTRAINT IF EXISTS alumnos_sf_opportunity_id_key`,
     `DROP INDEX IF EXISTS alumnos_sf_opportunity_id_key`,
     `CREATE UNIQUE INDEX IF NOT EXISTS alumnos_sf_opportunity_id_key ON alumnos (sf_opportunity_id) WHERE sf_order_id IS NULL`,
