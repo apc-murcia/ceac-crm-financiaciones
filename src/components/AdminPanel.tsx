@@ -84,8 +84,8 @@ export default function AdminPanel({ currentUserRol }: AdminPanelProps) {
     e.preventDefault()
     if (!editing) return
     setSaving(true)
-    const body: any = { nombre: editForm.nombre, rol: editForm.rol, sede: editForm.sede, activo: editForm.activo }
-    if (editForm.password) body.password = editForm.password
+    const body: any = { nombre: editForm.nombre, rol: editForm.rol, sede: editForm.sede, activo: editForm.activo, acceso_modalidad: editForm.acceso_modalidad }
+    if (editForm.password) { body.password = editForm.password; body.force_change = true }
     const r = await fetch(`/api/users/${encodeURIComponent(editing.email)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
