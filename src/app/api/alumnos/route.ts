@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     search: searchParams.get('search') || undefined,
     page: Number(searchParams.get('page') || 1),
     limit: Math.min(Number(searchParams.get('limit') || 50), 200),
+    pago_cambiado: searchParams.get('pago_cambiado') === '1',
   }
 
   const user = session.user as any
@@ -62,6 +63,16 @@ export async function GET(request: NextRequest) {
     )
     params.push(`%${filters.search}%`)
     paramIdx++
+  }
+  if (filters.pago_cambiado) {
+    conditions.push(`(
+      a.forma_pago_actual IS NOT NULL AND (
+        a.forma_pago_actual IS DISTINCT FROM a.forma_pago_original OR
+        a.financiera_actual IS DISTINCT FROM a.financiera_original OR
+        a.plazos_actual IS DISTINCT FROM a.plazos_original OR
+        a.importe_total_actual IS DISTINCT FROM a.importe_total_original
+      )
+    )`)
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''

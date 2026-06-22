@@ -229,9 +229,21 @@ export default function AlumnoDetailPage() {
 
             {/* Forma de pago */}
             <div style={card}>
-              <h2 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0017EC', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '1rem' }}>
-                Forma de pago
-              </h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0017EC', textTransform: 'uppercase', letterSpacing: '0.07em', margin: 0 }}>
+                  Forma de pago
+                </h2>
+                {(alumno.forma_pago_actual && (
+                  alumno.forma_pago_actual !== alumno.forma_pago_original ||
+                  alumno.financiera_actual !== alumno.financiera_original ||
+                  alumno.plazos_actual !== alumno.plazos_original ||
+                  alumno.importe_total_actual !== alumno.importe_total_original
+                )) && (
+                  <span style={{ background: '#CDFF4F', color: '#0a0a2e', fontWeight: 700, fontSize: '0.72rem', borderRadius: '6px', padding: '0.15rem 0.6rem' }}>
+                    ⚡ Pago cambiado
+                  </span>
+                )}
+              </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
 
                 {/* Original */}
@@ -259,20 +271,23 @@ export default function AlumnoDetailPage() {
                   <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.875rem' }}>
                     Actual (vigente)
                   </div>
-                  {[
-                    ['Método', alumno.forma_pago_actual],
-                    ['Financiera', alumno.financiera_actual],
-                    ['Plazos', alumno.plazos_actual ? `${alumno.plazos_actual} cuotas` : null],
-                    ['1er pago', alumno.fecha_primer_pago_actual ? new Date(alumno.fecha_primer_pago_actual).toLocaleDateString('es-ES') : null],
-                    ['Total', formatEuro(alumno.importe_total_actual)],
-                    ['Reserva', formatEuro(alumno.importe_reserva_actual)],
-                    ['Financiado', formatEuro(alumno.importe_financiado_actual)],
-                  ].map(([label, value]) => (
-                    <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.3rem 0', borderBottom: '1px solid #bbf7d0' }}>
-                      <span style={{ fontSize: '0.78rem', color: '#166534' }}>{label}</span>
-                      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: value && value !== '—' ? '#14532d' : '#d1d5db' }}>{value || '—'}</span>
-                    </div>
-                  ))}
+                  {([
+                    ['Método',    alumno.forma_pago_actual,    alumno.forma_pago_original],
+                    ['Financiera',alumno.financiera_actual,    alumno.financiera_original],
+                    ['Plazos',    alumno.plazos_actual ? `${alumno.plazos_actual} cuotas` : null, alumno.plazos_original ? `${alumno.plazos_original} cuotas` : null],
+                    ['1er pago',  alumno.fecha_primer_pago_actual ? new Date(alumno.fecha_primer_pago_actual).toLocaleDateString('es-ES') : null, null],
+                    ['Total',     formatEuro(alumno.importe_total_actual),     formatEuro(alumno.importe_total_original)],
+                    ['Reserva',   formatEuro(alumno.importe_reserva_actual),   formatEuro(alumno.importe_reserva_original)],
+                    ['Financiado',formatEuro(alumno.importe_financiado_actual),formatEuro(alumno.importe_financiado_original)],
+                  ] as [string, string|null, string|null][]).map(([label, value, original]) => {
+                    const changed = value && original && value !== '—' && original !== '—' && value !== original
+                    return (
+                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.3rem 0', borderBottom: '1px solid #bbf7d0', background: changed ? 'rgba(205,255,79,0.25)' : 'transparent', margin: changed ? '0 -0.25rem' : 0, padding: changed ? '0.3rem 0.25rem' : '0.3rem 0', borderRadius: changed ? '4px' : 0 }}>
+                        <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: changed ? 700 : 400 }}>{label}{changed ? ' ⚡' : ''}</span>
+                        <span style={{ fontSize: '0.875rem', fontWeight: 700, color: changed ? '#14532d' : (value && value !== '—' ? '#14532d' : '#d1d5db') }}>{value || '—'}</span>
+                      </div>
+                    )
+                  })}
                 </div>
 
               </div>

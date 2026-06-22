@@ -112,6 +112,7 @@ export interface AlumnoFilters {
   search?: string
   page?: number
   limit?: number
+  pago_cambiado?: boolean
 }
 
 export interface AlumnoUpdatePayload {

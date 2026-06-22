@@ -50,10 +50,10 @@ const ESTADO_COLORS: Record<EstadoAlumno, { bg: string; text: string }> = {
 const PAGE_SIZE = 50
 
 interface PageProps {
-  searchParams: { estado?: string; sede?: string; search?: string; page?: string }
+  searchParams: { estado?: string; sede?: string; search?: string; page?: string; pago_cambiado?: string }
 }
 
-async function getAlumnos(filters: { estado?: string; sede?: string; search?: string; page: number }) {
+async function getAlumnos(filters: { estado?: string; sede?: string; search?: string; page: number; pago_cambiado?: boolean }) {
   const conditions: string[] = []
   const params: any[] = []
   let idx = 1
@@ -64,6 +64,14 @@ async function getAlumnos(filters: { estado?: string; sede?: string; search?: st
     conditions.push(`(a.nombre ILIKE $${idx} OR a.apellidos ILIKE $${idx} OR a.email ILIKE $${idx} OR a.telefono ILIKE $${idx})`)
     params.push(`%${filters.search}%`)
     idx++
+  }
+  if (filters.pago_cambiado) {
+    conditions.push(`(a.forma_pago_actual IS NOT NULL AND (
+      a.forma_pago_actual IS DISTINCT FROM a.forma_pago_original OR
+      a.financiera_actual IS DISTINCT FROM a.financiera_original OR
+      a.plazos_actual IS DISTINCT FROM a.plazos_original OR
+      a.importe_total_actual IS DISTINCT FROM a.importe_total_original
+    ))`)
   }
 
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
@@ -95,11 +103,13 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
   if (!session) redirect('/login')
 
   const page = Math.max(1, Number(searchParams.page || 1))
+  const pagoCambiado = searchParams.pago_cambiado === '1'
   const { alumnos, total } = await getAlumnos({
     estado: searchParams.estado || '',
     sede: searchParams.sede || '',
     search: searchParams.search || '',
     page,
+    pago_cambiado: pagoCambiado,
   })
   const pages = Math.ceil(total / PAGE_SIZE)
 
@@ -108,12 +118,13 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
     if (searchParams.estado) params.set('estado', searchParams.estado)
     if (searchParams.sede)   params.set('sede', searchParams.sede)
     if (searchParams.search) params.set('search', searchParams.search)
+    if (searchParams.pago_cambiado) params.set('pago_cambiado', searchParams.pago_cambiado)
     params.set('page', '1')
     Object.entries(overrides).forEach(([k, v]) => v ? params.set(k, v) : params.delete(k))
     return `/dashboard/alumnos?${params.toString()}`
   }
 
-  const hayFiltros = searchParams.estado || searchParams.sede || searchParams.search
+  const hayFiltros = searchParams.estado || searchParams.sede || searchParams.search || searchParams.pago_cambiado
 
   return (
     <div style={{ minHeight: '100vh', background: '#f0f0fb' }}>
@@ -167,6 +178,20 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
 
           <button type="submit" className="btn btn-primary">Filtrar</button>
 
+          <a
+            href={pagoCambiado ? '/dashboard/alumnos' : buildUrl({ pago_cambiado: '1' })}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+              padding: '0.45rem 0.875rem', borderRadius: '6px', fontSize: '0.8125rem', fontWeight: 700,
+              textDecoration: 'none', whiteSpace: 'nowrap', alignSelf: 'flex-end',
+              background: pagoCambiado ? '#CDFF4F' : '#fff',
+              color: pagoCambiado ? '#0a0a2e' : '#0017EC',
+              border: `2px solid ${pagoCambiado ? '#CDFF4F' : '#0017EC'}`,
+            }}
+          >
+            ⚡ Pago cambiado{pagoCambiado ? ' ✕' : ''}
+          </a>
+
           {hayFiltros && (
             <a href="/dashboard/alumnos" className="btn btn-outline">Limpiar</a>
           )}
@@ -184,7 +209,7 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
             <table className="table">
               <thead>
                 <tr>
-                  {['Alumno', 'Sede', 'Curso', 'Estado', 'Financiado', 'Oferta', 'DocMgr', 'Agente', 'Último contacto'].map(h => (
+                  {['Alumno', 'Sede', 'Curso', 'Forma de pago', 'Estado', 'Financiado', 'Oferta', 'DocMgr', 'Agente', 'Último contacto'].map(h => (
                     <th key={h}>{h}</th>
                   ))}
                 </tr>
@@ -205,6 +230,13 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
                     : alumno.doc_mgr_status === 'Blue' ? '#0017EC'
                     : '#9ca3af'
 
+                  const pagoCambio = alumno.forma_pago_actual && (
+                    alumno.forma_pago_actual !== alumno.forma_pago_original ||
+                    alumno.financiera_actual !== alumno.financiera_original ||
+                    alumno.plazos_actual !== alumno.plazos_original ||
+                    alumno.importe_total_actual !== alumno.importe_total_original
+                  )
+
                   return (
                     <tr key={alumno.id}>
                       <td>
@@ -214,12 +246,29 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
                         {alumno.telefono && (
                           <div style={{ fontSize: '0.75rem', color: '#5a5a8a' }}>{alumno.telefono}</div>
                         )}
+                        {pagoCambio && (
+                          <span style={{ fontSize: '0.65rem', fontWeight: 700, background: '#CDFF4F', color: '#0a0a2e', borderRadius: '4px', padding: '0.1rem 0.4rem', marginTop: '0.2rem', display: 'inline-block' }}>
+                            ⚡ Pago cambiado
+                          </span>
+                        )}
                       </td>
                       <td style={{ color: '#5a5a8a' }}>{alumno.sede || '—'}</td>
                       <td style={{ maxWidth: '200px' }}>
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#5a5a8a' }}>
                           {alumno.curso || '—'}
                         </div>
+                      </td>
+                      <td>
+                        {alumno.forma_pago_actual ? (
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: '0.8125rem', color: pagoCambio ? '#166534' : '#5a5a8a' }}>
+                              {alumno.forma_pago_actual}
+                            </div>
+                            {alumno.financiera_actual && (
+                              <div style={{ fontSize: '0.72rem', color: '#9ca3af' }}>{alumno.financiera_actual} · {alumno.plazos_actual}c</div>
+                            )}
+                          </div>
+                        ) : '—'}
                       </td>
                       <td>
                         <span className="badge" style={{ background: ec.bg, color: ec.text, whiteSpace: 'nowrap' }}>
