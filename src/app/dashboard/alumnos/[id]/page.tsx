@@ -282,7 +282,7 @@ export default function AlumnoDetailPage() {
                   ] as [string, string|null, string|null][]).map(([label, value, original]) => {
                     const changed = value && original && value !== '—' && original !== '—' && value !== original
                     return (
-                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.3rem 0', borderBottom: '1px solid #bbf7d0', background: changed ? 'rgba(205,255,79,0.25)' : 'transparent', margin: changed ? '0 -0.25rem' : 0, padding: changed ? '0.3rem 0.25rem' : '0.3rem 0', borderRadius: changed ? '4px' : 0 }}>
+                      <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: changed ? '0.3rem 0.25rem' : '0.3rem 0', borderBottom: '1px solid #bbf7d0', background: changed ? 'rgba(205,255,79,0.25)' : 'transparent', margin: changed ? '0 -0.25rem' : 0, borderRadius: changed ? '4px' : 0 }}>
                         <span style={{ fontSize: '0.78rem', color: '#166534', fontWeight: changed ? 700 : 400 }}>{label}{changed ? ' ⚡' : ''}</span>
                         <span style={{ fontSize: '0.875rem', fontWeight: 700, color: changed ? '#14532d' : (value && value !== '—' ? '#14532d' : '#d1d5db') }}>{value || '—'}</span>
                       </div>
