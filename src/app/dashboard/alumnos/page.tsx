@@ -8,7 +8,7 @@ import DashboardNav from '@/components/DashboardNav'
 
 const ESTADOS: { value: EstadoAlumno | ''; label: string }[] = [
   { value: '', label: 'Todos los estados' },
-  { value: 'pendiente_llamar', label: 'Pendiente llamar' },
+  { value: 'pendiente_llamar', label: 'Pendiente de contactar' },
   { value: 'no_localizable', label: 'No localizable' },
   { value: 'llamado', label: 'Llamado' },
   { value: 'interesado', label: 'Interesado' },
@@ -26,7 +26,7 @@ const SEDES: { value: Sede | ''; label: string }[] = [
 ]
 
 const ESTADO_LABELS: Record<EstadoAlumno, string> = {
-  pendiente_llamar: 'Pendiente llamar',
+  pendiente_llamar: 'Pendiente de contactar',
   no_localizable: 'No localizable',
   llamado: 'Llamado',
   interesado: 'Interesado',

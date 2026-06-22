@@ -128,7 +128,7 @@ export default async function DashboardPage() {
           />
           <KpiCard label="En proceso Sabadell" value={kpis.en_proceso_sabadell} highlight="#6666F0" />
           <KpiCard label="Interesados" value={kpis.interesado} highlight="#0ea5e9" />
-          <KpiCard label="Pendiente llamar" value={kpis.pendiente_llamar} highlight="#FF9800" />
+          <KpiCard label="Pendiente de contactar" value={kpis.pendiente_llamar} highlight="#FF9800" />
           <KpiCard label="No localizable" value={kpis.no_localizable} highlight="#9ca3af" />
           <KpiCard label="Rechazados" value={kpis.rechazados} highlight="#F44336" />
         </div>
@@ -169,7 +169,7 @@ export default async function DashboardPage() {
             Ver todos los alumnos
           </a>
           <a href="/dashboard/alumnos?estado=pendiente_llamar" className="btn btn-outline">
-            Pendiente llamar ({kpis.pendiente_llamar})
+            Pendiente de contactar ({kpis.pendiente_llamar})
           </a>
           <a href="/dashboard/alumnos?estado=interesado" className="btn btn-outline">
             Interesados ({kpis.interesado})

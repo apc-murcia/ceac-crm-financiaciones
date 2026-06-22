@@ -11,7 +11,7 @@ const ESTADOS: EstadoAlumno[] = [
   'en_proceso_sabadell', 'convertido', 'rechazado_banco', 'rechazado_alumno',
 ]
 const ESTADO_LABELS: Record<EstadoAlumno, string> = {
-  pendiente_llamar: 'Pendiente llamar', no_localizable: 'No localizable',
+  pendiente_llamar: 'Pendiente de contactar', no_localizable: 'No localizable',
   llamado: 'Llamado', interesado: 'Interesado',
   en_proceso_sabadell: 'En proceso Sabadell', convertido: 'Convertido',
   rechazado_banco: 'Rechazado banco', rechazado_alumno: 'Rechazado alumno',
