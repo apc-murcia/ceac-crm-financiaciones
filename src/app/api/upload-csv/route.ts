@@ -49,7 +49,6 @@ function parseCSV(text: string): { headers: string[]; rows: string[][] } {
 
 function parseFecha(val: string): string | null {
   if (!val?.trim()) return null
-  // Convierte DD/MM/YYYY → YYYY-MM-DD
   const parts = val.trim().split('/')
   if (parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`
   return null
@@ -57,7 +56,11 @@ function parseFecha(val: string): string | null {
 
 function parseImporte(val: string): number | null {
   if (!val?.trim()) return null
-  const cleaned = val.trim().replace(',', '.')
+  // Soporta: "5252,5" / "5.252,50" / "5.252,50 €"
+  const cleaned = val.trim()
+    .replace(/\s*€\s*/, '')  // quita símbolo €
+    .replace(/\./g, '')       // quita separadores de miles
+    .replace(',', '.')        // coma decimal → punto
   const num = parseFloat(cleaned)
   return isNaN(num) ? null : num
 }
@@ -68,6 +71,21 @@ function mapEstado(stageName: string): string {
   if (stageName.toLowerCase().includes('baja')) return 'baja'
   return 'pendiente_llamar'
 }
+
+// Nombres exactos de columnas en el CSV para forma de pago
+const COL_ORIG_METODO    = 'Original-Auxiliar-forma-pago-original.Opportunity.OrderInProgress__r.MethodPayment__c - O'
+const COL_ORIG_PLAZOS    = 'Original-Auxiliar-forma-pago-original.Opportunity.OrderInProgress__r.Terms__c - Original'
+const COL_ORIG_FINANCIERA = 'Original-Auxiliar-forma-pago-original.Opportunity.OrderInProgress__r.Financiera__c - Orig'
+const COL_ORIG_TOTAL     = 'Original-Auxiliar-forma-pago-original.Opportunity.OrderInProgress__r.Importe_Total__c - O'
+const COL_ORIG_RESERVA   = 'Original-Auxiliar-forma-pago-original.Opportunity.OrderInProgress__r.ReservaAmount__c - O'
+const COL_ORIG_FINANCIADO = 'Original-Auxiliar-forma-pago-original.Opportunity.OrderInProgress__r.FinancedAmount__c -'
+const COL_ACTUAL_METODO  = 'Actual-OpportunityLineItem-formas-de-pago-actual.Opportunity.OrderInProgress__r.MethodP'
+const COL_ACTUAL_FINANCIERA = 'Actual-OpportunityLineItem-formas-de-pago-actual.Opportunity.OrderInProgress__r.Financi'
+const COL_ACTUAL_PLAZOS  = 'Actual-OpportunityLineItem-formas-de-pago-actual.Opportunity.OrderInProgress__r.Terms__'
+const COL_ACTUAL_FECHA   = 'Actual-OpportunityLineItem-formas-de-pago-actual.Opportunity.OrderInProgress__r.FirstPa'
+const COL_ACTUAL_TOTAL   = 'Actual-OpportunityLineItem-formas-de-pago-actual.Opportunity.OrderInProgress__r.Importe'
+const COL_ACTUAL_RESERVA = 'Actual-OpportunityLineItem-formas-de-pago-actual.Opportunity.OrderInProgress__r.Reserva'
+const COL_ACTUAL_FINANCIADO = 'Actual-OpportunityLineItem-formas-de-pago-actual.Opportunity.OrderInProgress__r.Finance'
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions)
@@ -100,28 +118,40 @@ export async function POST(req: NextRequest) {
       const sfOrderId = row[col('Opportunity.OrderInProgress__r.Id')]?.trim() || null
 
       const values = [
-        sfId,
-        sfOrderId,
-        nombre,
-        apellidos,
-        row[col('Opportunity.Account.PersonEmail')]?.trim() || null,
-        row[col('Opportunity.Account.Phone')]?.trim() || null,
-        row[col('Opportunity.Center__r.Name')]?.trim() || null,
-        row[col('Opportunity.ActualProducts__c')]?.split(',')[0]?.trim() || null,
-        row[col('Opportunity.Modality__c')]?.trim() || null,
-        mapEstado(row[col('Opportunity.StageName')]?.trim()),
-        parseImporte(row[col('Opportunity.OrderInProgress__r.Importe_Total__c')]),
-        parseImporte(row[col('Opportunity.OrderInProgress__r.ReservaAmount__c')]),
-        parseImporte(row[col('Opportunity.OrderInProgress__r.FinancedAmount__c')]),
-        row[col('Opportunity.OrderInProgress__r.DocMgrStatus__c')]?.trim() || null,
-        row[col('Opportunity.OrderInProgress__r.InternalComments__c')]?.trim() || null,
-        parseFecha(row[col('CreatedDate')]),
-        row[col('Tipo producto')]?.trim() || null,
+        sfId,                                                                              // $1
+        sfOrderId,                                                                         // $2
+        nombre,                                                                            // $3
+        apellidos,                                                                         // $4
+        row[col('Opportunity.Account.PersonEmail')]?.trim() || null,                      // $5
+        row[col('Opportunity.Account.Phone')]?.trim() || null,                            // $6
+        row[col('Opportunity.Center__r.Name')]?.trim() || null,                          // $7
+        row[col('Opportunity.ActualProducts__c')]?.split(',')[0]?.trim() || null,        // $8
+        row[col('Opportunity.Modality__c')]?.trim() || null,                             // $9
+        mapEstado(row[col('Opportunity.StageName')]?.trim()),                            // $10
+        parseImporte(row[col('Opportunity.OrderInProgress__r.Importe_Total__c')]),      // $11
+        parseImporte(row[col('Opportunity.OrderInProgress__r.ReservaAmount__c')]),      // $12
+        parseImporte(row[col('Opportunity.OrderInProgress__r.FinancedAmount__c')]),     // $13
+        row[col('Opportunity.OrderInProgress__r.DocMgrStatus__c')]?.trim() || null,     // $14
+        row[col('Opportunity.OrderInProgress__r.InternalComments__c')]?.trim() || null, // $15
+        parseFecha(row[col('CreatedDate')]),                                             // $16
+        row[col('Tipo producto')]?.trim() || null,                                       // $17
+        // Forma de pago original
+        row[col(COL_ORIG_METODO)]?.trim() || null,                                      // $18
+        row[col(COL_ORIG_PLAZOS)]?.trim() || null,                                      // $19
+        row[col(COL_ORIG_FINANCIERA)]?.trim() || null,                                   // $20
+        parseImporte(row[col(COL_ORIG_TOTAL)]),                                         // $21
+        parseImporte(row[col(COL_ORIG_RESERVA)]),                                       // $22
+        parseImporte(row[col(COL_ORIG_FINANCIADO)]),                                    // $23
+        // Forma de pago actual
+        row[col(COL_ACTUAL_METODO)]?.trim() || null,                                    // $24
+        row[col(COL_ACTUAL_FINANCIERA)]?.trim() || null,                                 // $25
+        row[col(COL_ACTUAL_PLAZOS)]?.trim() || null,                                    // $26
+        parseFecha(row[col(COL_ACTUAL_FECHA)]),                                         // $27
+        parseImporte(row[col(COL_ACTUAL_TOTAL)]),                                       // $28
+        parseImporte(row[col(COL_ACTUAL_RESERVA)]),                                     // $29
+        parseImporte(row[col(COL_ACTUAL_FINANCIADO)]),                                  // $30
       ]
 
-      // Upsert por sf_order_id si existe (matrícula SF), si no por sf_opportunity_id
-      // El índice de sf_order_id es parcial (WHERE sf_order_id IS NOT NULL)
-      // El índice de sf_opportunity_id es parcial (WHERE sf_order_id IS NULL)
       const commonSet = [
         'nombre = EXCLUDED.nombre',
         'apellidos = EXCLUDED.apellidos',
@@ -137,6 +167,19 @@ export async function POST(req: NextRequest) {
         'doc_mgr_status = EXCLUDED.doc_mgr_status',
         'ultimo_comentario = EXCLUDED.ultimo_comentario',
         'tipo_producto = EXCLUDED.tipo_producto',
+        'forma_pago_original = EXCLUDED.forma_pago_original',
+        'plazos_original = EXCLUDED.plazos_original',
+        'financiera_original = EXCLUDED.financiera_original',
+        'importe_total_original = EXCLUDED.importe_total_original',
+        'importe_reserva_original = EXCLUDED.importe_reserva_original',
+        'importe_financiado_original = EXCLUDED.importe_financiado_original',
+        'forma_pago_actual = EXCLUDED.forma_pago_actual',
+        'financiera_actual = EXCLUDED.financiera_actual',
+        'plazos_actual = EXCLUDED.plazos_actual',
+        'fecha_primer_pago_actual = EXCLUDED.fecha_primer_pago_actual',
+        'importe_total_actual = EXCLUDED.importe_total_actual',
+        'importe_reserva_actual = EXCLUDED.importe_reserva_actual',
+        'importe_financiado_actual = EXCLUDED.importe_financiado_actual',
         'updated_at = NOW()',
       ].join(', ')
 
@@ -155,8 +198,15 @@ export async function POST(req: NextRequest) {
           sf_opportunity_id, sf_order_id, nombre, apellidos, email, telefono,
           sede, curso, modalidad, estado,
           importe_total_recibos, importe_reserva, importe_financiado,
-          doc_mgr_status, ultimo_comentario, fecha_conversion, tipo_producto
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+          doc_mgr_status, ultimo_comentario, fecha_conversion, tipo_producto,
+          forma_pago_original, plazos_original, financiera_original,
+          importe_total_original, importe_reserva_original, importe_financiado_original,
+          forma_pago_actual, financiera_actual, plazos_actual, fecha_primer_pago_actual,
+          importe_total_actual, importe_reserva_actual, importe_financiado_actual
+        ) VALUES (
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,
+          $18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30
+        )
         ON CONFLICT ${conflictClause} DO UPDATE SET ${updateSetFinal}
         RETURNING (xmax = 0) AS was_inserted
       `, values)
