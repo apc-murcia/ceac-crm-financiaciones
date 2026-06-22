@@ -161,7 +161,7 @@ export async function POST(req: NextRequest) {
         'sede = EXCLUDED.sede',
         'curso = EXCLUDED.curso',
         'modalidad = EXCLUDED.modalidad',
-        'estado = EXCLUDED.estado',
+        // estado NO se sobreescribe en reimportación — lo gestiona el agente
         'importe_total_recibos = EXCLUDED.importe_total_recibos',
         'importe_reserva = EXCLUDED.importe_reserva',
         'importe_financiado = EXCLUDED.importe_financiado',
