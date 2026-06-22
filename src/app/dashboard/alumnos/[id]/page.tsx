@@ -227,6 +227,57 @@ export default function AlumnoDetailPage() {
               </div>
             </div>
 
+            {/* Forma de pago */}
+            <div style={card}>
+              <h2 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0017EC', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '1rem' }}>
+                Forma de pago
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+
+                {/* Original */}
+                <div style={{ background: '#f8f8ff', borderRadius: '10px', padding: '1rem', border: '1.5px solid #E5E5FA' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#5a5a8a', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.875rem' }}>
+                    Original (al contratar)
+                  </div>
+                  {[
+                    ['Método', alumno.forma_pago_original],
+                    ['Financiera', alumno.financiera_original],
+                    ['Plazos', alumno.plazos_original ? `${alumno.plazos_original} cuotas` : null],
+                    ['Total', formatEuro(alumno.importe_total_original)],
+                    ['Reserva', formatEuro(alumno.importe_reserva_original)],
+                    ['Financiado', formatEuro(alumno.importe_financiado_original)],
+                  ].map(([label, value]) => (
+                    <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.3rem 0', borderBottom: '1px solid #E5E5FA' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#5a5a8a' }}>{label}</span>
+                      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: value && value !== '—' ? '#0a0a2e' : '#d1d5db' }}>{value || '—'}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Actual */}
+                <div style={{ background: '#f0fdf4', borderRadius: '10px', padding: '1rem', border: '1.5px solid #86efac' }}>
+                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '0.875rem' }}>
+                    Actual (vigente)
+                  </div>
+                  {[
+                    ['Método', alumno.forma_pago_actual],
+                    ['Financiera', alumno.financiera_actual],
+                    ['Plazos', alumno.plazos_actual ? `${alumno.plazos_actual} cuotas` : null],
+                    ['1er pago', alumno.fecha_primer_pago_actual ? new Date(alumno.fecha_primer_pago_actual).toLocaleDateString('es-ES') : null],
+                    ['Total', formatEuro(alumno.importe_total_actual)],
+                    ['Reserva', formatEuro(alumno.importe_reserva_actual)],
+                    ['Financiado', formatEuro(alumno.importe_financiado_actual)],
+                  ].map(([label, value]) => (
+                    <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '0.3rem 0', borderBottom: '1px solid #bbf7d0' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#166534' }}>{label}</span>
+                      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: value && value !== '—' ? '#14532d' : '#d1d5db' }}>{value || '—'}</span>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+
             {/* Historial */}
             <div style={card}>
               <h2 style={{ fontSize: '0.875rem', fontWeight: 700, color: '#0017EC', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: '1rem' }}>

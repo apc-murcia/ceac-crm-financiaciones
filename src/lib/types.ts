@@ -57,6 +57,22 @@ export interface Alumno {
   sf_order_id: string | null
   fecha_ultimo_contacto: string | null
   fecha_conversion: string | null
+  tipo_producto: string | null
+  // Forma de pago original (datos al contratar)
+  forma_pago_original: string | null
+  plazos_original: string | null
+  financiera_original: string | null
+  importe_total_original: number | null
+  importe_reserva_original: number | null
+  importe_financiado_original: number | null
+  // Forma de pago actual (puede haber cambiado)
+  forma_pago_actual: string | null
+  financiera_actual: string | null
+  plazos_actual: string | null
+  fecha_primer_pago_actual: string | null
+  importe_total_actual: number | null
+  importe_reserva_actual: number | null
+  importe_financiado_actual: number | null
   created_at: string
   updated_at: string
   // Joins opcionales
