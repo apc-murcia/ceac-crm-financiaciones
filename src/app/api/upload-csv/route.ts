@@ -135,21 +135,22 @@ export async function POST(req: NextRequest) {
         row[col('Opportunity.OrderInProgress__r.InternalComments__c')]?.trim() || null, // $15
         parseFecha(row[col('CreatedDate')]),                                             // $16
         row[col('Tipo producto')]?.trim() || null,                                       // $17
+        row[col('Opportunity.StageName')]?.trim() || null,                               // $18 — estado_sf
         // Forma de pago original
-        row[col(COL_ORIG_METODO)]?.trim() || null,                                      // $18
-        row[col(COL_ORIG_PLAZOS)]?.trim() || null,                                      // $19
-        row[col(COL_ORIG_FINANCIERA)]?.trim() || null,                                   // $20
-        parseImporte(row[col(COL_ORIG_TOTAL)]),                                         // $21
-        parseImporte(row[col(COL_ORIG_RESERVA)]),                                       // $22
-        parseImporte(row[col(COL_ORIG_FINANCIADO)]),                                    // $23
+        row[col(COL_ORIG_METODO)]?.trim() || null,                                      // $19
+        row[col(COL_ORIG_PLAZOS)]?.trim() || null,                                      // $20
+        row[col(COL_ORIG_FINANCIERA)]?.trim() || null,                                   // $21
+        parseImporte(row[col(COL_ORIG_TOTAL)]),                                         // $22
+        parseImporte(row[col(COL_ORIG_RESERVA)]),                                       // $23
+        parseImporte(row[col(COL_ORIG_FINANCIADO)]),                                    // $24
         // Forma de pago actual
-        row[col(COL_ACTUAL_METODO)]?.trim() || null,                                    // $24
-        row[col(COL_ACTUAL_FINANCIERA)]?.trim() || null,                                 // $25
-        row[col(COL_ACTUAL_PLAZOS)]?.trim() || null,                                    // $26
-        parseFecha(row[col(COL_ACTUAL_FECHA)]),                                         // $27
-        parseImporte(row[col(COL_ACTUAL_TOTAL)]),                                       // $28
-        parseImporte(row[col(COL_ACTUAL_RESERVA)]),                                     // $29
-        parseImporte(row[col(COL_ACTUAL_FINANCIADO)]),                                  // $30
+        row[col(COL_ACTUAL_METODO)]?.trim() || null,                                    // $25
+        row[col(COL_ACTUAL_FINANCIERA)]?.trim() || null,                                 // $26
+        row[col(COL_ACTUAL_PLAZOS)]?.trim() || null,                                    // $27
+        parseFecha(row[col(COL_ACTUAL_FECHA)]),                                         // $28
+        parseImporte(row[col(COL_ACTUAL_TOTAL)]),                                       // $29
+        parseImporte(row[col(COL_ACTUAL_RESERVA)]),                                     // $30
+        parseImporte(row[col(COL_ACTUAL_FINANCIADO)]),                                  // $31
       ]
 
       const commonSet = [
@@ -167,6 +168,7 @@ export async function POST(req: NextRequest) {
         'doc_mgr_status = EXCLUDED.doc_mgr_status',
         'ultimo_comentario = EXCLUDED.ultimo_comentario',
         'tipo_producto = EXCLUDED.tipo_producto',
+        'estado_sf = EXCLUDED.estado_sf',
         'forma_pago_original = EXCLUDED.forma_pago_original',
         'plazos_original = EXCLUDED.plazos_original',
         'financiera_original = EXCLUDED.financiera_original',
@@ -198,14 +200,14 @@ export async function POST(req: NextRequest) {
           sf_opportunity_id, sf_order_id, nombre, apellidos, email, telefono,
           sede, curso, modalidad, estado,
           importe_total_recibos, importe_reserva, importe_financiado,
-          doc_mgr_status, ultimo_comentario, fecha_conversion, tipo_producto,
+          doc_mgr_status, ultimo_comentario, fecha_conversion, tipo_producto, estado_sf,
           forma_pago_original, plazos_original, financiera_original,
           importe_total_original, importe_reserva_original, importe_financiado_original,
           forma_pago_actual, financiera_actual, plazos_actual, fecha_primer_pago_actual,
           importe_total_actual, importe_reserva_actual, importe_financiado_actual
         ) VALUES (
-          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,
-          $18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30
+          $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
+          $19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31
         )
         ON CONFLICT ${conflictClause} DO UPDATE SET ${updateSetFinal}
         RETURNING (xmax = 0) AS was_inserted

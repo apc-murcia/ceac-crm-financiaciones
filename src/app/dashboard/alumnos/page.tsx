@@ -49,17 +49,24 @@ const ESTADO_COLORS: Record<EstadoAlumno, { bg: string; text: string }> = {
 
 const PAGE_SIZE = 50
 
+const ESTADO_SF_OPTIONS = [
+  { value: '', label: 'Todos (estado SF)' },
+  { value: 'Pendiente Matrícula', label: 'Pendiente Matrícula' },
+  { value: 'Cerrada ganada', label: 'Cerrada ganada' },
+]
+
 interface PageProps {
-  searchParams: { estado?: string; sede?: string; search?: string; page?: string; pago_cambiado?: string }
+  searchParams: { estado?: string; sede?: string; search?: string; page?: string; pago_cambiado?: string; estado_sf?: string }
 }
 
-async function getAlumnos(filters: { estado?: string; sede?: string; search?: string; page: number; pago_cambiado?: boolean }) {
+async function getAlumnos(filters: { estado?: string; sede?: string; search?: string; page: number; pago_cambiado?: boolean; estado_sf?: string }) {
   const conditions: string[] = []
   const params: any[] = []
   let idx = 1
 
-  if (filters.estado) { conditions.push(`a.estado = $${idx++}`); params.push(filters.estado) }
-  if (filters.sede)   { conditions.push(`a.sede = $${idx++}`);   params.push(filters.sede) }
+  if (filters.estado)    { conditions.push(`a.estado = $${idx++}`);    params.push(filters.estado) }
+  if (filters.sede)      { conditions.push(`a.sede = $${idx++}`);      params.push(filters.sede) }
+  if (filters.estado_sf) { conditions.push(`a.estado_sf = $${idx++}`); params.push(filters.estado_sf) }
   if (filters.search) {
     conditions.push(`(a.nombre ILIKE $${idx} OR a.apellidos ILIKE $${idx} OR a.email ILIKE $${idx} OR a.telefono ILIKE $${idx})`)
     params.push(`%${filters.search}%`)
@@ -110,6 +117,7 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
     search: searchParams.search || '',
     page,
     pago_cambiado: pagoCambiado,
+    estado_sf: searchParams.estado_sf || '',
   })
   const pages = Math.ceil(total / PAGE_SIZE)
 
@@ -119,12 +127,13 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
     if (searchParams.sede)   params.set('sede', searchParams.sede)
     if (searchParams.search) params.set('search', searchParams.search)
     if (searchParams.pago_cambiado) params.set('pago_cambiado', searchParams.pago_cambiado)
+    if (searchParams.estado_sf) params.set('estado_sf', searchParams.estado_sf)
     params.set('page', '1')
     Object.entries(overrides).forEach(([k, v]) => v ? params.set(k, v) : params.delete(k))
     return `/dashboard/alumnos?${params.toString()}`
   }
 
-  const hayFiltros = searchParams.estado || searchParams.sede || searchParams.search || searchParams.pago_cambiado
+  const hayFiltros = searchParams.estado || searchParams.sede || searchParams.search || searchParams.pago_cambiado || searchParams.estado_sf
 
   return (
     <div style={{ minHeight: '100vh', background: '#f0f0fb' }}>
@@ -168,6 +177,13 @@ export default async function AlumnosPage({ searchParams }: PageProps) {
             <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0017EC', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sede</label>
             <select name="sede" defaultValue={searchParams.sede || ''} className="input">
               {SEDES.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+            <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#0017EC', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Estado matrícula SF</label>
+            <select name="estado_sf" defaultValue={searchParams.estado_sf || ''} className="input">
+              {ESTADO_SF_OPTIONS.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
             </select>
           </div>
 

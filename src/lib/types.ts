@@ -58,6 +58,7 @@ export interface Alumno {
   fecha_ultimo_contacto: string | null
   fecha_conversion: string | null
   tipo_producto: string | null
+  estado_sf: string | null
   // Forma de pago original (datos al contratar)
   forma_pago_original: string | null
   plazos_original: string | null
