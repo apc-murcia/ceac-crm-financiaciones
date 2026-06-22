@@ -18,6 +18,7 @@ export async function POST(req: NextRequest) {
     `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS fecha_conversion VARCHAR(50)`,
     `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS tipo_producto VARCHAR(50)`,
     `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS observaciones TEXT`,
+    `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS estado_sf VARCHAR(100)`,
     `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS forma_pago_original VARCHAR(100)`,
     `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS plazos_original VARCHAR(50)`,
     `ALTER TABLE alumnos ADD COLUMN IF NOT EXISTS financiera_original VARCHAR(100)`,
